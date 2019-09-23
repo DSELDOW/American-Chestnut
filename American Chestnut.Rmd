@@ -1,0 +1,55 @@
+---
+title: "American Chestnut"
+author: "Gabriel M. David S."
+date: "9/23/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+# We chose the American Chestnut becuase of it's unique conservation issues due to the presence of Cryphonectria parasitica, the causative agent leading to chestnut blight. The near extinction of the Chestnut caused by the blight was one of the most remarkable epidemics due to its rapid elimination of nearly 4 billion mature trees. An interesting piece of the Chestnut's story is the presence of a hypovirus that acts as a htyperparasite to C. parasitica. The hypovirus is credited with preventing the spread of the lbight in Europe, especially in mature trees. North American species have not seen the same restorative qualities due to the hyperparasite. 
+#We want to look into the stage that is being affected most by the blight and determine which life stage of the tree is most crucial for increasing population size. The data from these matrices included epidemic, recovering, and unaffected populations but we chose to examine the epidemic populations. 
+```{r}
+matrix<-compadre$mat[6536][[1]]$matA
+eigout<-eigen(matrix)
+eigout$values[1]
+w <- eigout$vectors[,1]
+```
+
+```{r}
+leigout <- eigen(t(matrix))
+leigout$values[1]
+v <- leigout$vectors[,1]
+
+```
+
+```{r}
+sensitivity <- function(v, w){
+  mat = matrix(0, 8, 8)
+  for (i in 1:8){
+    for (j in 1:8){
+      mat[i,j] = v[i]*w[j]/(v %*% w)
+    }
+  }
+  return(mat)
+}
+
+elasticity <- function(A, lambda, v, w){
+  mat = matrix(0, 8, 8)
+  for (i in 1:8){
+    for (j in 1:8){
+      mat[i,j] = (A[i,j]/lambda)*(v[i]*w[j]/(v %*% w))
+    }
+  }
+  return(mat)
+}
+```
+
+```{r}
+sensitivities <- sensitivity(v, w)
+elasticities <- elasticity(matrix, eigout$values[1], v, w)
+```
+#The eigen value tells us that the population is delcining, though being so close to 1 it is not dropping precipitously. This was a surprising quality for the epidemic population but we knew that the blight does not affect the roots of the tree and thus the population is able to present near sustainable qualities. 
