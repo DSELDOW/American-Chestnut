@@ -25,14 +25,14 @@ We want to look into the stage that is being affected most by the blight and det
 load("C:/Users/gmeye/Documents/SoftwareCarpentry/r_lessons/COMPADRE_v.5.0.0.RData")
 matrix<-compadre$mat[6536][[1]]$matA
 eigout<-eigen(matrix)
-eigout$values[1]
-w <- eigout$vectors[,1]
+lambda <- Re(eigout$values[1])
+w <- Re(eigout$vectors[,1])
 ```
 
 ```{r}
 leigout <- eigen(t(matrix))
 leigout$values[1]
-v <- leigout$vectors[,1]
+v <- Re(leigout$vectors[,1])
 
 ```
 
@@ -60,10 +60,19 @@ elasticity <- function(A, lambda, v, w){
 
 ```{r}
 sensitivities <- sensitivity(v, w)
-elasticities <- elasticity(matrix, eigout$values[1], v, w)
+elasticities <- elasticity(matrix, lambda, v, w)
 ```
 
 
-The eigen value tells us that the population is delcining, though being so close to 1 it is not dropping precipitously. This was a surprising quality for the epidemic population but we knew that the blight does not affect the roots of the tree and thus the population is able to present near sustainable qualities. 
+The eigen value tells us that the population is delcining, though being so close to 1 it is not dropping precipitously. This was a surprising quality for the epidemic population but we knew that the blight does not affect the roots of the tree and thus the population is able to present near sustainable qualities.
+
+"w", the right eigenvector, represents the stable population distribution across stages. It is easier to interpret if we normalize to sum to one instead of having a magnitude of one.
+
+```{r, eval=TRUE, echo=TRUE}
+w/sum(w)
+```
+
+We can see that the vast majority of the population is concentrated in stages 5 and 6, the juvenile stage and smallest potentially reproductive stage. Given that almost half of the stable population distribution is in a potentially reproductive stage, this could explain how the American chestnut demonstrates a fairly slow rate of decline despite the blight.
+
 
 ## Question 4
