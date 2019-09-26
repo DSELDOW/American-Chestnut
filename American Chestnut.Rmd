@@ -27,7 +27,7 @@ matrix<-compadre$mat[6536][[1]]$matA
 eigout<-eigen(matrix)
 lambda <- Re(eigout$values[1])
 w <- Re(eigout$vectors[,1])
-```
+```ma
 
 ```{r}
 leigout <- eigen(t(matrix))
@@ -76,3 +76,43 @@ We can see that the vast majority of the population is concentrated in stages 5 
 
 
 ## Question 4
+
+```{r}
+stages = c(1:8)
+Ps = c()
+Fs = c()
+for (i in stages){
+  Ps = c(Ps, elasticities[i,i])
+  Fs = c(Fs, elasticities[1,i])
+}
+plot(stages, Ps,type='b', pch=1)
+par(new=T)
+plot(stages, Fs,type='b', pch=4, axes=F)
+axis(side=4)
+mtext(side=4, line=3, "Fs")
+```
+
+```{r}
+stages2 = c(1:7)
+Gs = c()
+for (i in stages2){
+  if (i == 2){
+    Gs = c(Gs, elasticities[i+2, i])
+  } else {
+  Gs = c(Gs, elasticities[i+1,i])
+  }
+}
+plot(stages2, Gs,type='b', pch=1)
+```
+```{r}
+Rs = matrix(0, 5, 5)
+for (j in 4:8){
+  for (i in 3:(j-1)){
+    Rs[j-3, i-2] = elasticities[i, j]
+  }
+}
+plot(3:7, Rs[1,], type='b', ylim=c(0, .035))
+for (row in 2:5){
+  points(3:7, Rs[row,], type='b')
+}
+```
