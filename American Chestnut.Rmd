@@ -27,7 +27,7 @@ matrix<-compadre$mat[6536][[1]]$matA
 eigout<-eigen(matrix)
 lambda <- Re(eigout$values[1])
 w <- Re(eigout$vectors[,1])
-```ma
+```
 
 ```{r}
 leigout <- eigen(t(matrix))
@@ -111,8 +111,32 @@ for (j in 4:8){
     Rs[j-3, i-2] = elasticities[i, j]
   }
 }
-plot(3:7, Rs[1,], type='b', ylim=c(0, .035))
+plot(3:7, Rs[1,], type='b', ylim=c(0, .035), pch=1)
+pchars = c(0, 2, 3, 4, 5)
 for (row in 2:5){
-  points(3:7, Rs[row,], type='b')
+  points(3:7, Rs[row,], type='b', pch=pchars[row])
 }
 ```
+
+```{r}
+mat_dff <- matrix
+mat_dff[1, 6] <- .001
+mat_dff[1, 7] <- .03
+mat_dff[1, 8] <- 7.74
+
+mat_rf <- matrix
+mat_rf[1, 6] <- .016
+mat_rf[1, 7] <- .78
+mat_rf[1, 8] <- 2.43
+
+eigout_dff <- eigen(mat_dff)
+eigout_rf <- eigen(mat_rf)
+
+Re(eigout_dff$values[1])
+w_dff <- Re(eigout_dff$vectors[,1])
+w_dff/sum(w_dff)
+Re(eigout_rf$values[1])
+w_rf <- Re(eigout_rf$vectors[,1])
+w_rf/sum(w_rf)
+```
+
