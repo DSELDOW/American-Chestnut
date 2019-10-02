@@ -5,6 +5,8 @@ date: "9/23/2019"
 output:
   pdf_document: default
   html_document: default
+header-includes:
+  - \usepackage{xcolor}
 ---
 
 ```{r setup, include=FALSE}
@@ -13,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Question 1
 
-We chose the American Chestnut becuase of it's unique conservation issues due to the presence of Cryphonectria parasitica, the causative agent leading to chestnut blight. The near extinction of the Chestnut caused by the blight was one of the most remarkable epidemics due to its rapid elimination of nearly 4 billion mature trees. An interesting piece of the Chestnut's story is the presence of a hypovirus that acts as a htyperparasite to C. parasitica. The hypovirus is credited with preventing the spread of the lbight in Europe, especially in mature trees. North American species have not seen the same restorative qualities due to the hyperparasite. 
+We chose the American Chestnut becuase of \textcolor{red}{its}it's unique conservation issues due to the presence of Cryphonectria parasitica, the causative agent leading to chestnut blight. The near extinction of the Chestnut caused by the blight was one of the most remarkable epidemics due to its rapid elimination of nearly 4 billion mature trees. An interesting piece of the Chestnut's story is the presence of a hypovirus that acts as a htyperparasite to C. parasitica. The hypovirus is credited with preventing the spread of the lbight in Europe, especially in mature trees. North American species have not seen the same restorative qualities due to the hyperparasite. 
 
 ## Question 2
 
@@ -22,7 +24,7 @@ We want to look into the stage that is being affected most by the blight and det
 ## Question 3
 
 ```{r}
-load("C:/Users/gmeye/Documents/SoftwareCarpentry/r_lessons/COMPADRE_v.5.0.0.RData")
+load("COMPADRE_v.5.0.0.RData")
 matrix<-compadre$mat[6536][[1]]$matA
 eigout<-eigen(matrix)
 lambda <- Re(eigout$values[1])
@@ -140,3 +142,13 @@ w_rf <- Re(eigout_rf$vectors[,1])
 w_rf/sum(w_rf)
 ```
 
+
+
+
+## Easton comments
+
+- Nice job on this assignment overall. You do a nice job at moving between the math and the biological interpretations
+- Be sure to use "relative paths" when pulling in data files if you are working with collaborators. In the first code chunk, you write ``load("C:/Users/gmeye/Documents/SoftwareCarpentry/r_lessons/COMPADRE_v.5.0.0.RData")``. I don't have the same file structure as you, so this code wouldn't work on my computer 
+- I like how you built your own custom sensitivity and elasticity functions, nice work
+- I appreciated the plots you produced. They make it easier to compare elasticities. It may have been helpful to include a figure legend or caption as well.
+- Can you go back and add additional text explaining your results for question 4? I want to know how you answered your problem proposed in question 2.
