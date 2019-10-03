@@ -23,14 +23,14 @@ We want to look into the stage that is being affected most by the blight and det
 
 ```{r}
 load("C:/Users/gmeye/Documents/SoftwareCarpentry/r_lessons/COMPADRE_v.5.0.0.RData")
-matrix<-compadre$mat[6536][[1]]$matA
-eigout<-eigen(matrix)
+A <-compadre$mat[6536][[1]]$matA
+eigout<-eigen(A)
 lambda <- Re(eigout$values[1])
 w <- Re(eigout$vectors[,1])
 ```
 
 ```{r}
-leigout <- eigen(t(matrix))
+leigout <- eigen(t(A))
 leigout$values[1]
 v <- Re(leigout$vectors[,1])
 
@@ -60,7 +60,7 @@ elasticity <- function(A, lambda, v, w){
 
 ```{r}
 sensitivities <- sensitivity(v, w)
-elasticities <- elasticity(matrix, lambda, v, w)
+elasticities <- elasticity(A, lambda, v, w)
 ```
 
 
@@ -102,29 +102,25 @@ for (i in stages2){
   Gs = c(Gs, elasticities[i+1,i])
   }
 }
-plot(stages2, Gs,type='b', pch=1)
-```
-```{r}
-Rs = matrix(0, 5, 5)
+Rs = c()
 for (j in 4:8){
-  for (i in 3:(j-1)){
-    Rs[j-3, i-2] = elasticities[i, j]
-  }
+  Rs = c(Rs, sum(elasticities[3:(j-1),j]))
 }
-plot(3:7, Rs[1,], type='b', ylim=c(0, .035), pch=1)
-pchars = c(0, 2, 3, 4, 5)
-for (row in 2:5){
-  points(3:7, Rs[row,], type='b', pch=pchars[row])
-}
+plot(stages2, Gs,type='b', pch=1)
+points(4:8, Rs, type='b', pch=4)
 ```
 
+## Testing primary effects of the disease
+
+Try replacing diseased fecundity values with disease free or recovering values.
+
 ```{r}
-mat_dff <- matrix
+mat_dff <- A
 mat_dff[1, 6] <- .001
 mat_dff[1, 7] <- .03
 mat_dff[1, 8] <- 7.74
 
-mat_rf <- matrix
+mat_rf <- A
 mat_rf[1, 6] <- .016
 mat_rf[1, 7] <- .78
 mat_rf[1, 8] <- 2.43
@@ -140,3 +136,26 @@ w_rf <- Re(eigout_rf$vectors[,1])
 w_rf/sum(w_rf)
 ```
 
+Try replacing diseased retrogression (and P) values with disease free and recovering values.
+
+```{r}
+mat_dfr <- A
+mat_dfr[-1:-3, 7] = c(0., 0., 0., 0.9415, 0.0585)
+mat_dfr[-1:-3, 8] = c(0., 0.0075, 0., 0., 0.98675)
+
+mat_rr <- A
+mat_rr[-1:-3, 7] = c(0.002, 0.005, 0.04, 0.91, 0.04)
+mat_rr[-1:-3, 8] = c(0., 0., 0.005, 0.05, .944)
+
+eigout_dfr <- eigen(mat_dfr)
+eigout_rr <- eigen(mat_rr)
+
+Re(eigout_dfr$values[1])
+w_dfr <- Re(eigout_dfr$vectors[,1])
+w_dfr/sum(w_dfr)
+Re(eigout_rr$values[1])
+w_rr <- Re(eigout_rr$vectors[,1])
+w_rr/sum(w_rr)
+```
+Big effect here, might be worth trying stages 7 and 8 separately.
+Maybe we should show the stable pop distribution as pie charts?
