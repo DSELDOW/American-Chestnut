@@ -5,6 +5,8 @@ date: "9/23/2019"
 output:
   pdf_document: default
   html_document: default
+header-includes:
+  - \usepackage{xcolor}
 ---
 
 ```{r setup, include=FALSE}
@@ -13,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Question 1
 
-We chose the American Chestnut becuase of it's unique conservation issues due to the presence of Cryphonectria parasitica, the causative agent leading to chestnut blight. The near extinction of the Chestnut caused by the blight was one of the most remarkable epidemics due to its rapid elimination of nearly 4 billion mature trees. An interesting piece of the Chestnut's story is the presence of a hypovirus that acts as a htyperparasite to C. parasitica. The hypovirus is credited with preventing the spread of the lbight in Europe, especially in mature trees. North American species have not seen the same restorative qualities due to the hyperparasite. 
+We chose the American Chestnut becuase of its unique conservation issues due to the presence of Cryphonectria parasitica, the causative agent leading to chestnut blight. The near extinction of the Chestnut caused by the blight was one of the most remarkable epidemics due to its rapid elimination of nearly 4 billion mature trees. An interesting piece of the Chestnut's story is the presence of a hypovirus that acts as a htyperparasite to C. parasitica. The hypovirus is credited with preventing the spread of the lbight in Europe, especially in mature trees. North American species have not seen the same restorative qualities due to the hyperparasite. 
 
 ## Question 2
 
@@ -22,9 +24,10 @@ We want to look into the stage that is being affected most by the blight and det
 ## Question 3
 
 ```{r}
-load("C:/Users/gmeye/Documents/SoftwareCarpentry/r_lessons/COMPADRE_v.5.0.0.RData")
+load("COMPADRE_v.5.0.0.RData")
 A <-compadre$mat[6536][[1]]$matA
 eigout<-eigen(A)
+
 lambda <- Re(eigout$values[1])
 w <- Re(eigout$vectors[,1])
 ```
@@ -74,8 +77,9 @@ w/sum(w)
 
 We can see that the vast majority of the population is concentrated in stages 5 and 6, the juvenile stage and smallest potentially reproductive stage. Given that almost half of the stable population distribution is in a potentially reproductive stage, this could explain how the American chestnut demonstrates a fairly slow rate of decline despite the blight.
 
-
 ## Question 4
+
+The life stage most crucial for increasing population size can be inferred by plotting the elasticities by stage.
 
 ```{r}
 stages = c(1:8)
@@ -85,12 +89,15 @@ for (i in stages){
   Ps = c(Ps, elasticities[i,i])
   Fs = c(Fs, elasticities[1,i])
 }
-plot(stages, Ps,type='b', pch=1)
+plot(stages, Ps,type='b', pch=1, ylab="Elasticity (P)", xlab="Stage")
 par(new=T)
-plot(stages, Fs,type='b', pch=4, axes=F)
+plot(stages, Fs,type='b', pch=4, axes=F,ylab="", xlab="")
 axis(side=4)
-mtext(side=4, line=3, "Fs")
+mtext("F", side=4, line=2)
+legend("topleft", legend=c("P_i", "F_i"), pch=c(1, 4))
 ```
+
+Plotting the elasticities for P, the proportion of the stage's population which stays in that stage in each timestep, shows that staying in stage 6, the first potentially reproductive stage, effects population growth by far the most. The elasticity in F, the fecundity, for stage 6 is also notable, given that it's value for F is much smaller than that for stage 7 or 8.
 
 ```{r}
 stages2 = c(1:7)
@@ -106,13 +113,23 @@ Rs = c()
 for (j in 4:8){
   Rs = c(Rs, sum(elasticities[3:(j-1),j]))
 }
-plot(stages2, Gs,type='b', pch=1)
+plot(stages2, Gs,type='b', xlim=c(1, 8), ylim=c(0, .05), pch=1, ylab="Elasticity", xlab="Stages")
 points(4:8, Rs, type='b', pch=4)
+legend("topleft", legend=c("G","R"), pch=c(1,4))
 ```
 
-## Testing primary effects of the disease
+To plot the elasticity in G, the probability of growing to the next stage, we substitute the value for stage 2 with the probability of growing from stage 2 to stage 4, as stage 2 and 3 represent the same size plants, just separated by whether the cause of the size is damage or age. To plot the elasticity in R, the probability of retrogressing to a previous stage, for each stage we find the sum of the elasticities for retrogression to all previous stages.
 
-Try replacing diseased fecundity values with disease free or recovering values.
+These plots produce key peaks in elasticity in G for stage 5 and elasticity in R for stage 6. These elasticities values clearly indicate that stage 6 is the crucial stage for population growth rate.
+
+
+### Testing primary effects of the disease
+
+Some background research reveals that our initial question was slightly misguided. The chestnut blight doesn't effect the roots of the tree and often doesn't occur in the trees until they mature. The result of this is that it usually eliminates the mature American chestnuts, but does not actually drive the overall population to extinction. This was confirmed by the study which this matrix is from, which found that the population growth rate did not depend on whether the population of trees was infected with chestnut blight or not.
+
+The main effect of the blight then is not to change the population growth rate, but the stable population distribution. We examined the diseased and disease-free models from this study and noted two major effects of the blight that appeared in the transition matrices, (1) decreased fecundity and (2) more retrogression. We decided to test these two effects separately to see which was primarily responsible for shifting the stable stage distribution.
+
+First we tried replacing diseased fecundity values with disease-free or recovering values and then found the new population growth rates and stable stage distributions.
 
 ```{r}
 mat_dff <- A
@@ -136,7 +153,15 @@ w_rf <- Re(eigout_rf$vectors[,1])
 w_rf/sum(w_rf)
 ```
 
-Try replacing diseased retrogression (and P) values with disease free and recovering values.
+Changing the fecundity values reveals very little change in either stable age distribution or population growth rate. The likely reason for this is that the diseased population is concentrated in stage 6, but the disease-free and recovered populations actually exhibited lower fecundity rates in stage 6. It appears that the blighted trees may have adapted to release seeds slightly earlier.
+
+```{r}
+(w_dff/sum(w_dff) - w/sum(w))/(w/sum(w))
+```
+
+Comparing the diseased and disease-free populations, we do see a significant proportional increase in stages 1 and 2, but the overall stable stage distribution is still dominated by stage 6.
+
+Then we tried replacing diseased retrogression values with disease free and recovering values. Notably, disease-free and recovering populations exhibited much less retrogression from the two largest stages and so, assuming that this was the primary effect of the blight on retrogression, we only swapped the retrogression values for these two stages. We also swapped the P values, as survival rates varied very little for stages 7 and 8 based on the presence of disease and dropping regression rates without increasing P would artificially decrease survival. 
 
 ```{r}
 mat_dfr <- A
@@ -157,5 +182,28 @@ Re(eigout_rr$values[1])
 w_rr <- Re(eigout_rr$vectors[,1])
 w_rr/sum(w_rr)
 ```
-Big effect here, might be worth trying stages 7 and 8 separately.
-Maybe we should show the stable pop distribution as pie charts?
+
+Here we see a much larger effect. Even though stages 7 and 8 both exhibited low elasticities in P and R, swapping these values has actually increased the population growth rate to be > 1, for both the recovering and disease-free values.
+
+The stable stage distributions no longer show stage 6 dominating the population, with a much larger presence of stage 2 trees.
+
+```{r}
+(w_dfr/sum(w_dfr) - w/sum(w))/(w/sum(w))
+(w_rr/sum(w_rr) - w/sum(w))/(w/sum(w))
+```
+
+Observing proportional shifts in the stable stage distribution, we see significantly larger portions of the population in stages 1, 2, 7, and 8, as well as a slightly larger stage 4 population. Notably, the recovering population has a higher proportion of stage 7 trees than the disease free population, indicating that in the disease free population a greater number of trees are able to fully mature. Although the relative increase in the proportion of fully mature trees is huge, these trees still form a small minority of the population, with a much larger absolute increase in the proportion of seedlings.
+
+These results clearly indicate that the most significant effect of the blight is the increased retrogression, which the change in fecundity playing a relatively minor role. The question "which stage is most affected by the blight?" is somewhat misleading as the blight results in the greatest (absolute) drop in the proportion of the population which are in stage 2, but none of these plants actually have the blight. The blight appears to be most directly responsible for the elimination of stage 8 trees, but as this is by far the most fertile stage, preserving a few more fully mature trees results in many more seedlings.
+
+=======
+
+
+
+## Easton comments
+
+- Nice job on this assignment overall. You do a nice job at moving between the math and the biological interpretations
+- Be sure to use "relative paths" when pulling in data files if you are working with collaborators. In the first code chunk, you write ``load("C:/Users/gmeye/Documents/SoftwareCarpentry/r_lessons/COMPADRE_v.5.0.0.RData")``. I don't have the same file structure as you, so this code wouldn't work on my computer 
+- I like how you built your own custom sensitivity and elasticity functions, nice work
+- I appreciated the plots you produced. They make it easier to compare elasticities. It may have been helpful to include a figure legend or caption as well.
+- Can you go back and add additional text explaining your results for question 4? I want to know how you answered your problem proposed in question 2.
